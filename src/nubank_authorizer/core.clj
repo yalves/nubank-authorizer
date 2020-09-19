@@ -4,7 +4,7 @@
   (:require [nubank-authorizer.processors.transaction :as transaction-processor]))
 
 (def account-data "{ \"account\": { \"activeCard\": true, \"availableLimit\": 100 } }")
-(def transaction-data "{ \"transaction\": { \"merchant\": \"Habbib's\", \"amount\": 20, \"time\": \"2019-02-13T11:00:00.000Z\" } }")
+(def transaction-data "{ \"transaction\": { \"merchant\": \"Habbib's\", \"amount\": 100, \"time\": \"2019-02-13T11:00:00.000Z\" } }")
 
 (def user-account (atom {}))
 (def user-transactions (atom []))
@@ -69,41 +69,29 @@
 
     (do (reset! user-violations (validation-result :violations)))))
 
-
-  ; (if
-  ;   (> transaction-amount current-amount) (
-  ;     (println (json/write-str @violations))
-  ;     (swap! violations conj "insufficient-limit")
-  ;     (swap! violations conj "teste")
-  ;     ;(println (json/write-str { :account (@user-account :account) :violations @violations }))
-  ;     )
-  ;     (
-  ;     (def final-amount (- current-amount transaction-amount))
-  ;     (swap! user-account update-in [:account :availableLimit] (constantly final-amount))
-  ;     ;(println (json/write-str @user-account))
-  ;     )))
-
 (defn main-workflow
   []
   (println "Insert your operations:")
-  (def account-operation (json/read-str account-data :key-fn keyword))
+  ; (def account-operation (json/read-str account-data :key-fn keyword))
+  ; (process-acount-operation (account-operation :account))
 
-  (println (:account account-operation))
-  (println (:transaction account-operation))
-  (process-acount-operation (account-operation :account))
+  (def transaction-operation (json/read-str (read-line) :key-fn keyword))
+  (def transaction-result (transaction-processor/process-transaction-operation (transaction-operation :transaction) @user-account))
+  (if-let [value (:account transaction-result)] 
+    (do 
+      (swap! user-account update-in [:account :availableLimit] (constantly ((:account transaction-result) :availableLimit)))
+      (swap! user-transactions conj (transaction-operation :transaction)))
+    (do (reset! user-violations transaction-result)))
 
-  (def transaction-operation (json/read-str transaction-data :key-fn keyword))
-  (transaction-processor/process-transaction-operation (transaction-operation :transaction))
-  (process-transaction-operation (transaction-operation :transaction))
-  (process-transaction-operation (transaction-operation :transaction))
 
   (println (json/write-str { :account (@user-account :account) :violations @user-violations }))
-  (println @user-transactions)
-  (read-line))
+  (println @user-transactions))
 
   (defn -main
     "Main operation workflow"
     [& args]
+    (def account-operation (json/read-str account-data :key-fn keyword))
+    (process-acount-operation (account-operation :account))
     (while true (main-workflow)))
     
   
