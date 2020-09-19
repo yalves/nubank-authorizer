@@ -33,42 +33,7 @@
 
     (do (reset! user-violations (validation-result :violations)))))
 
-(defn validate-transaction
-  [transaction account]
-  (def transaction-amount (transaction :amount))
-  (def current-amount ((account :account) :availableLimit))
-  (def violations (atom []))
-  (def success (atom true))
-
-  (if (> transaction-amount current-amount)
-    (do (swap! violations conj "insufficient-limit")
-        (reset! success false)))
-
-  (if (= ((account :account) :activeCard) false)
-    (do (swap! violations conj "card-not-active")
-        (reset! success false)))
   
-  { :success @success :violations @violations })
-
-
-(defn commit-transaction
-  [transaction]
-  (def transaction-amount (transaction :amount))
-  (def current-amount ((@user-account :account) :availableLimit))
-  (def final-amount (- current-amount transaction-amount))
-  (swap! user-transactions conj transaction)
-  (swap! user-account update-in [:account :availableLimit] (constantly final-amount)))
-
-(defn process-transaction-operation
-  [transaction]
-  (def validation-result (validate-transaction transaction @user-account))
-  (if 
-    (validation-result :success)
-
-    (commit-transaction transaction)
-
-    (do (reset! user-violations (validation-result :violations)))))
-
 (defn main-workflow
   []
   (println "Insert your operations:")
@@ -76,6 +41,7 @@
   ; (process-acount-operation (account-operation :account))
 
   (def transaction-operation (json/read-str (read-line) :key-fn keyword))
+
   (def transaction-result (transaction-processor/process-transaction-operation (transaction-operation :transaction) @user-account))
   (if-let [value (:account transaction-result)] 
     (do 
