@@ -1,23 +1,37 @@
 (ns nubank-authorizer.core
   (:gen-class)
   (:require [clojure.data.json :as json])
-  (:require [clojure.core.cache :as cache]))
+  (:require [nubank-authorizer.processors.transaction :as transaction-processor]))
 
 (def account-data "{ \"account\": { \"activeCard\": true, \"availableLimit\": 100 } }")
-(def transaction-data "{ \"transaction\": { \"merchant\": \"Habbib's\", \"amount\": 90, \"time\": \"2019-02-13T11:00:00.000Z\" } }")
+(def transaction-data "{ \"transaction\": { \"merchant\": \"Habbib's\", \"amount\": 20, \"time\": \"2019-02-13T11:00:00.000Z\" } }")
 
-(def user-account (atom { :account { :activeCard false :availableLimit 0}}))
+(def user-account (atom {}))
 (def user-transactions (atom []))
 (def user-violations (atom []))
 
-; (def user-account (cache/fifo-cache-factory { :account { :activeCard false :availableLimit 0}}))
-; (def user-transactions (cache/fifo-cache-factory [{ :transaction { :activeCard false :availableLimit 0}}]))
-; (def user-violations (cache/fifo-cache-factory []))
+(defn validate-account-creation
+  [account user-account]
+
+  (def violations (atom []))
+  (def success (atom true))
+
+  (if
+    (not (= user-account {}))      
+    (do (swap! violations conj "account-already-initialized")
+        (reset! success false)))
+
+  { :success @success :violations @violations })
 
 (defn process-acount-operation
   [account]
-  (swap! user-account assoc :account account)
-  (println (json/write-str @user-account)))
+  (def validation-result (validate-account-creation account @user-account))
+  (if 
+    (validation-result :success)
+
+    (swap! user-account assoc :account account)
+
+    (do (reset! user-violations (validation-result :violations)))))
 
 (defn validate-transaction
   [transaction account]
@@ -73,12 +87,16 @@
   []
   (println "Insert your operations:")
   (def account-operation (json/read-str account-data :key-fn keyword))
-  (println (get account-operation :account))
-  (println account-operation)
+
+  (println (:account account-operation))
+  (println (:transaction account-operation))
   (process-acount-operation (account-operation :account))
 
   (def transaction-operation (json/read-str transaction-data :key-fn keyword))
+  (transaction-processor/process-transaction-operation (transaction-operation :transaction))
   (process-transaction-operation (transaction-operation :transaction))
+  (process-transaction-operation (transaction-operation :transaction))
+
   (println (json/write-str { :account (@user-account :account) :violations @user-violations }))
   (println @user-transactions)
   (read-line))
