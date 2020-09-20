@@ -1,21 +1,17 @@
 (ns nubank-authorizer.processors.transaction
-  (:require [nubank-authorizer.validators.transaction :as transaction-validator])
   (:gen-class))
 
-(defn commit-transaction
-  [transaction account]
-  (def transaction-amount (transaction :amount))
-  (def current-amount ((account :account) :availableLimit))
-  (def final-amount (- current-amount transaction-amount))
-  (def user-account (atom account))
-  (swap! user-account update-in [:account :availableLimit] (constantly final-amount)))
+  (defn transact
+    "Effetuates the transaction operation."
+    [validated-transaction]
+    (if
+     (validated-transaction :success)
 
-(defn process-transaction-operation
-  [transaction account]
-  (def validation-result (transaction-validator/validate transaction account))
-  (if 
-    (validation-result :success)
-
-    (commit-transaction transaction account)
-
-    (validation-result :violations)))
+      (do (def transaction-amount ((validated-transaction :transaction) :amount))
+       (def current-amount ((validated-transaction :account) :availableLimit))
+       (def final-amount (- current-amount transaction-amount))
+       (def user-account (atom (validated-transaction :account)))
+       (swap! user-account update-in [:availableLimit] (constantly final-amount))
+       { :success true :violations (validated-transaction :violations) :transaction (validated-transaction :transaction) :account @user-account})
+      
+      (do { :success false :violations (validated-transaction :violations) :transaction (validated-transaction :transaction) :account (validated-transaction :account)})))
