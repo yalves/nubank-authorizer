@@ -29,7 +29,7 @@
     (def transaction-operation (json/read-str (read-line) :key-fn keyword))
 
     (->>
-      (operation-manager/execute-operation transaction-operation @user-account)
+      (operation-manager/execute-operation transaction-operation @user-account @user-transactions)
       (update-state))
 
     (println (json/write-str { :account @user-account :violations @user-violations }))

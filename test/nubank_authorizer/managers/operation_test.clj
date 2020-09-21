@@ -11,7 +11,7 @@
   (fact "Given a account operation, the manager should trigger the account flow"
     (def test-operation {:account {:availableLimit 100 :activeCard true }})
     (def account {})
-    (operation-manager/execute-operation test-operation account)
+    (operation-manager/execute-operation test-operation account [])
       => {:success true :violations [] :account {:availableLimit 100 :activeCard true }}
     (provided
       (account-processor/update-account {:activeCard true, :availableLimit 100} {}) 
@@ -23,10 +23,10 @@
   (fact "Given a transaction operation, the manager should trigger only the transaction flow"
     (def test-operation {:transaction { :merchant "Burger King", :amount 90, :time "2019-02-13T10:00:00.000Z" }})
     (def account {:availableLimit 100 :activeCard true })
-    (operation-manager/execute-operation test-operation account)
+    (operation-manager/execute-operation test-operation account [])
       => {:success true :violations [] :account {:availableLimit 10 :activeCard true } :transaction (test-operation :transaction)}
     (provided
-      (transaction-validator/validate { :merchant "Burger King", :amount 90, :time "2019-02-13T10:00:00.000Z" } {:availableLimit 100 :activeCard true }) 
+      (transaction-validator/validate { :merchant "Burger King", :amount 90, :time "2019-02-13T10:00:00.000Z" } {:availableLimit 100 :activeCard true } []) 
         => {:success true :violations [] :account {:availableLimit 100 :activeCard true } :transaction { :merchant "Burger King", :amount 90, :time "2019-02-13T10:00:00.000Z" }})
     (provided
       (transaction-processor/transact {:success true :violations [] :account {:availableLimit 100 :activeCard true } :transaction { :merchant "Burger King", :amount 90, :time "2019-02-13T10:00:00.000Z" }})

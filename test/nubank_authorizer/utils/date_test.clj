@@ -8,7 +8,7 @@
 
 (facts "Date util"
   (fact "Given a valid time, the result must be the time interval in minutes"
-    (def brazil-time (t/minus (t/now) (t/hours 3)))
-    (def time (t/minus brazil-time (t/minutes 2)))
-    (date-util/get-interval-from-now-in-minutes time)
+    (def begin (t/minus (t/now) (t/minutes 2)))
+    (def end (t/now))
+    (date-util/get-interval-in-minutes begin end)
     => 2))

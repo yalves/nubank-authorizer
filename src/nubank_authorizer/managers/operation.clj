@@ -5,13 +5,12 @@
   (:gen-class))
 
   (defn execute-operation
-    [operation account]
+    [operation account past-transactions]
 
     (def operation-type (get-in (first (map (fn [[k v]] k) operation)) []))
 
     (case operation-type
       :account (do (account-processor/update-account (operation :account) account))
 
-      :transaction (do (->>
-      (transaction-validator/validate (operation :transaction) account)
-      (transaction-processor/transact)))))
+      :transaction (do (->> (transaction-validator/validate (operation :transaction) account past-transactions)
+                            (transaction-processor/transact)))))
