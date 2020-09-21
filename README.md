@@ -1,37 +1,59 @@
-# nubank-authorizer
+## 🚀 Tecnologies
 
-FIXME: description
+This project was developed using these technologies:
 
-## Installation
+- [Clojure](https://https://clojure.org/)
+- [Leiningen](https://leiningen.org/)
+- [Clj-time](https://github.com/clj-time/clj-time)
+- [Midje](https://github.com/marick/Midje)
 
-Download from http://example.com/FIXME.
+## 💻 Project
+The project was developed for the <strong>Nubank</strong> company as an exercise. The goal was to create an authorizer that can receive transactions and output the result of them.
 
-## Usage
+## 🏃‍♂️ Running
 
-FIXME: explanation
+```bash
+# Navigate into the project directory
+$ cd nubank-authorizer
 
-    $ docker build -t nubank-authorizer .
-    $ docker run -ti nubank-authorizer
+# You can run the project building and running the docker image that's inside
+$ docker build -t nubank-authorizer .
+$ docker run -ti nubank-authorizer
 
-## Options
+### OR
 
-FIXME: listing of options this app accepts.
+# You can just run it via leiningen
+$ lein run
+```
 
-## Examples
+## ✅ Tests
+You can run the tests using the following command:
+```bash
+$ lein midje
+```
 
-...
+## 👨🏽‍💻 How to use
+At the start, the application will prompt the user for an operation
+``` bash
+Insert your operation:
+```
 
-### Bugs
+The user must input an account or transaction operation
+``` bash
+Insert your operation:
+{ "account": { "activeCard": true, "availableLimit": 100 } }
+```
 
-...
+The application will return the current status of the account and possible violations that may occur in the business rules
+``` bash
+Insert your operation:
+{ "account": { "activeCard": true, "availableLimit": 100 } }
+{"account":{"activeCard":true,"availableLimit":100},"violations":[]}
+```
 
-### Any Other Sections
-### That You Think
-### Might be Useful
+After that, the user will be prompted again and can input another operation.
 
-## License
+_P.S.: The user must input a account operation before he does any transaction_
 
-Copyright © 2020 FIXME
+Made with 💗 by [Yan Alves](https://www.linkedin.com/in/yan-alves-monteiro-b8743810a/)
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
