@@ -32,16 +32,9 @@
       (operation-manager/execute-operation transaction-operation @user-account @user-transactions)
       (update-state))
 
-    (println (json/write-str { :account @user-account :violations @user-violations }))
-    (println @user-transactions))
+    (println (json/write-str { :account @user-account :violations @user-violations })))
       
   (defn -main
     "Triggers the authorization flow."
     []
     (while true (main-workflow)))
-
-
-; (doseq [ln (line-seq (java.io.BufferedReader. *in*))]
-;   (println "*************** \n\n\n")
-;   (println (clojure.string/split-lines ln))))
-;(def operations (json/read-str in))

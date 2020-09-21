@@ -33,10 +33,3 @@
       => { :success true :violations [] :transaction { :merchant "Burger King", :amount 90, :time "2019-02-13T10:00:00.000Z" } :account {:availableLimit 10 :activeCard true }})
     (provided
       (account-processor/update-account anything) => irrelevant :times 0)))
-    
-  ; (fact "Given a successful input, the user available limit should be updated"
-  ;   (def transaction { :merchant "Burger King", :amount 80, :time "2019-02-13T10:00:00.000Z" })
-  ;   (def account {:availableLimit 100 :activeCard true })
-  ;   (def input {:success true :violations [] :transaction transaction :account account})
-  ;   (transaction-processor/transact input)
-  ;   => {:success true :violations [] :transaction transaction :account {:availableLimit 20 :activeCard true }}))

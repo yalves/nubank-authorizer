@@ -1,6 +1,5 @@
 (ns nubank-authorizer.validators.transaction
   (:require [clj-time [format :as time-formatter]]
-                      ;[core :as time]]
             [nubank-authorizer.utils.date :as date-util])
   (:gen-class))
 

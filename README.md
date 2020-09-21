@@ -10,7 +10,8 @@ Download from http://example.com/FIXME.
 
 FIXME: explanation
 
-    $ java -jar nubank-authorizer-0.1.0-standalone.jar [args]
+    $ docker build -t nubank-authorizer .
+    $ docker run -ti nubank-authorizer
 
 ## Options
 
