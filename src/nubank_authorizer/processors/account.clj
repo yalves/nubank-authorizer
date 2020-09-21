@@ -1,12 +1,16 @@
 (ns nubank-authorizer.processors.account
   (:gen-class))
 
-  (defn register
-    "Registers an account."
-    [validated-account]
-    (if
-     (validated-account :success)
+  (defn update-account
+    "Updates the user account status"
+    [account current-account]
 
-      (do { :success true :violations (validated-account :violations) :account (validated-account :account)})
-      
-      (do { :success false :violations (validated-account :violations) :account (validated-account :account)})))
+    (def violations (atom []))
+    (def success (atom true))
+
+    (if
+      (not (= current-account {}))
+      (do (swap! violations conj "account-already-initialized")
+          (reset! success false)
+          { :success @success :violations @violations :account current-account})
+      (do { :success @success :violations @violations :account account})))

@@ -1,8 +1,7 @@
 (ns nubank-authorizer.managers.operation
   (:require [nubank-authorizer.processors.transaction :as transaction-processor]
             [nubank-authorizer.validators.transaction :as transaction-validator]
-            [nubank-authorizer.processors.account :as account-processor]
-            [nubank-authorizer.validators.account :as account-validator])
+            [nubank-authorizer.processors.account :as account-processor])
   (:gen-class))
 
   (defn execute-operation
@@ -10,11 +9,7 @@
     
     (for [[k v] operation]
       (case k
-        :account (        
-        (->>
-        (account-validator/validate account)
-        (account-processor/register)
-        (println)))
+        :account ((account-processor/update-account v account))
 
         :transaction ((->>
         (transaction-validator/validate v account)
