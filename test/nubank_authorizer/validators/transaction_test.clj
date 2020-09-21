@@ -28,4 +28,15 @@
     (def account {:availableLimit 100 :activeCard false })
     (transaction-validator/validate transaction account)
     => {:success false :violations ["insufficient-limit" "card-not-active"] :transaction transaction :account {:availableLimit 100 :activeCard false }})
-    )
+  
+    (fact "Given a past transaction with the same merchant and same amount in less than 2 minutes, the validation should fail"
+      (def transaction { :merchant "Burger King", :amount 20, :time "2019-02-13T10:00:00.000Z" })
+      (def account {:availableLimit 100 :activeCard true })
+      (transaction-validator/validate transaction account)
+      => {:success false :violations ["doubled-transaction"] :transaction transaction :account {:availableLimit 100 :activeCard true }})
+      
+    (fact "Given two past transactions in less than 2 minutes, the validation should fail"
+      (def transaction { :merchant "Burger King", :amount 20, :time "2019-02-13T10:00:00.000Z" })
+      (def account {:availableLimit 100 :activeCard true })
+      (transaction-validator/validate transaction account)
+      => {:success false :violations ["high-frequency-small-interval"] :transaction transaction :account {:availableLimit 100 :activeCard true }}))
