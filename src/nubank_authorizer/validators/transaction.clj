@@ -17,4 +17,4 @@
       (do (swap! violations conj "card-not-active")
           (reset! success false)))
 
-    { :success @success :violations @violations :transaction transaction :account account })
+    { :success @success :violations @violations :transaction (transaction :transaction) :account account })
