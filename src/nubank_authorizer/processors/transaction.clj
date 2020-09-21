@@ -4,6 +4,7 @@
   (defn transact
     "Effetuates the transaction operation."
     [validated-transaction]
+  
     (if
      (validated-transaction :success)
 

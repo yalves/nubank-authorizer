@@ -6,13 +6,12 @@
 
   (defn execute-operation
     [operation account]
-    
-    (for [[k v] operation]
-      (case k
-        :account ((account-processor/update-account v account))
 
-        :transaction ((->>
-        (transaction-validator/validate v account)
-        (transaction-processor/transact)))
-        
-        )))
+    (def operation-type (get-in (first (map (fn [[k v]] k) operation)) []))
+
+    (case operation-type
+      :account (do (account-processor/update-account (operation :account) account))
+
+      :transaction (do (->>
+      (transaction-validator/validate (operation :transaction) account)
+      (transaction-processor/transact)))))

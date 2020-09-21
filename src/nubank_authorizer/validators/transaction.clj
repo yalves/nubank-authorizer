@@ -4,10 +4,11 @@
   (defn validate
     "Validates a transaction against  an account"
     [transaction account]
-    (def transaction-amount ((transaction :transaction) :amount))
+
+    (def transaction-amount (transaction :amount))
     (def current-amount (account :availableLimit))
     (def violations (atom []))
-    (def success (atom true))    
+    (def success (atom true))
 
     (if (> transaction-amount current-amount)
       (do (swap! violations conj "insufficient-limit")
@@ -17,4 +18,4 @@
       (do (swap! violations conj "card-not-active")
           (reset! success false)))
 
-    { :success @success :violations @violations :transaction (transaction :transaction) :account account })
+    { :success @success :violations @violations :transaction transaction :account account })

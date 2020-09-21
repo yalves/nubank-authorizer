@@ -1,90 +1,44 @@
 (ns nubank-authorizer.core
   (:gen-class)
-  (:require [clojure.data.json :as json])
-  (:require [nubank-authorizer.processors.transaction :as transaction-processor])
-  (:require [nubank-authorizer.validators.transaction :as transaction-validator])
-  (:require [nubank-authorizer.managers.operation :as operation-manager]))
+  (:require [clojure.data.json :as json]
+            [nubank-authorizer.processors.transaction :as transaction-processor]
+            [nubank-authorizer.validators.transaction :as transaction-validator]
+            [nubank-authorizer.managers.operation :as operation-manager]))
 
   (def account-data "{ \"account\": { \"activeCard\": true, \"availableLimit\": 100 } }")
   (def transaction-data "{ \"transaction\": { \"merchant\": \"Habbib's\", \"amount\": 110, \"time\": \"2019-02-13T11:00:00.000Z\" } }")
 
   (def user-account (atom {}))
   (def user-transactions (atom []))
-  (def user-violations (atom []))
-
-  (defn validate-account-creation
-    [account user-account]
-
-    (def violations (atom []))
-    (def success (atom true))
-
-    (if
-      (not (= user-account {}))      
-      (do (swap! violations conj "account-already-initialized")
-          (reset! success false)))
-
-    { :success @success :violations @violations })
-
-  (defn process-acount-operation
-    [account]
-    (def validation-result (validate-account-creation account @user-account))
-    (if 
-      (validation-result :success)
-
-      (swap! user-account assoc :account account)
-    
-      (do (reset! user-violations (validation-result :violations)))))    
+  (def user-violations (atom [])) 
     
   (defn update-state
     "Updates the application state."
     [state]
-    (println "ENTROU NO UPDATE")
-    (println state)
-    (swap! user-account update-in [:account :availableLimit] (constantly ((:account state) :availableLimit)))
-    (if (not(= (state :transaction) nil))
-      (do(swap! user-transactions conj (state :transaction))))    
-    (reset! user-violations (state :violations)))
+    (reset! user-violations (state :violations))
+    (if (state :success)
+        (do
+          ((reset! user-account (state :account))           
+           (if (not (= (state :transaction) nil))
+             (do (swap! user-transactions conj (state :transaction))))))))
         
   (defn main-workflow
     "Orchestrates the operation workflow."
     []
     (println "Insert your operations:")
-    ;(def transaction-operation (json/read-str (read-line) :key-fn keyword))
-    (def transaction-operation (json/read-str transaction-data :key-fn keyword))
+    (def transaction-operation (json/read-str (read-line) :key-fn keyword))
 
-    ; (println (operation-manager/execute-operation transaction-operation (@user-account :account)))
+    (->>
+      (operation-manager/execute-operation transaction-operation @user-account)
+      (update-state))
 
-    ; (->>
-    ;   (operation-manager/execute-operation transaction-operation (@user-account :account))
-    ;   (update-state))
-
-    (println (json/write-str { :account (@user-account :account) :violations @user-violations }))
+    (println (json/write-str { :account @user-account :violations @user-violations }))
     (println @user-transactions))
       
   (defn -main
     "Triggers the authorization flow."
-    [& args]
-    (def account-operation (json/read-str account-data :key-fn keyword))
-    ;(process-acount-operation (account-operation :account))
-    (->> (operation-manager/execute-operation account-operation @user-account)
-         (update-state))
+    []
     (while true (main-workflow)))
-        
-        
-
-
-;; (def transaction-result (transaction-processor/process-transaction-operation (transaction-operation :transaction) @user-account))
-;; (if-let [value (:account transaction-result)] 
-;;   (do 
-;;     (swap! user-account update-in [:account :availableLimit] (constantly ((:account transaction-result) :availableLimit)))
-;;     (swap! user-transactions conj (transaction-operation :transaction)))
-;;   (do (reset! user-violations transaction-result)))
-      
-
-; { "account": { "activeCard": true, "availableLimit": 100 } }
-; { "transaction": { "merchant": "Burger King", "amount": 20, "time": "2019-02-13T10:00:00.000Z" } }
-; { "transaction": { "merchant": "Habbib's", "amount": 90, "time": "2019-02-13T11:00:00.000Z" } }
-
 
 
 ; (doseq [ln (line-seq (java.io.BufferedReader. *in*))]
