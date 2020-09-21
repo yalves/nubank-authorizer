@@ -7,4 +7,4 @@
                  [org.clojure/data.json "1.0.0"]]
   :main ^:skip-aot nubank-authorizer.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all} :dev {:dependencies [[midje "1.6.3"]]}})
