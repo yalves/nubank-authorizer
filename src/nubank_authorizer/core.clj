@@ -5,9 +5,6 @@
             [nubank-authorizer.validators.transaction :as transaction-validator]
             [nubank-authorizer.managers.operation :as operation-manager]))
 
-  (def account-data "{ \"account\": { \"activeCard\": true, \"availableLimit\": 100 } }")
-  (def transaction-data "{ \"transaction\": { \"merchant\": \"Habbib's\", \"amount\": 110, \"time\": \"2019-02-13T11:00:00.000Z\" } }")
-
   (def user-account (atom {}))
   (def user-transactions (atom []))
   (def user-violations (atom [])) 
@@ -25,7 +22,7 @@
   (defn main-workflow
     "Orchestrates the operation workflow."
     []
-    (println "Insert your operations:")
+    (println "Insert your operation:")
     (def transaction-operation (json/read-str (read-line) :key-fn keyword))
 
     (->>
